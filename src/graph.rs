@@ -1,5 +1,6 @@
 pub mod analyzer;
 pub mod builder;
+pub mod generator;
 pub mod visualizer;
 use crate::graph::analyzer::GraphAnalyzer;
 use crate::graph::visualizer::dot::*;
