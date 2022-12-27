@@ -13,3 +13,7 @@ A sandbox to play with digraphs.
 - AStar
 - BFS
 - DFS
+
+- Random graphs
+  - Erdős-Rényi model
+  - Watts Strogatz model
