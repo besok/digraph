@@ -50,7 +50,7 @@ where
             visited.visit(node);
             match target(node) {
                 SearchRes::Next => {
-                    for nexts in self.graph.descendants(node.clone()) {
+                    for nexts in self.graph.successors(node.clone()) {
                         for s in nexts.keys() {
                             if !visited.already_visited(s) {
                                 q.push(s)
@@ -105,7 +105,7 @@ where
             visited.visit(node);
             match target(node) {
                 SearchRes::Next => {
-                    for nexts in self.graph.descendants(node.clone()) {
+                    for nexts in self.graph.successors(node.clone()) {
                         for s in nexts.keys() {
                             if !visited.already_visited(s) {
                                 q.push_back(s)

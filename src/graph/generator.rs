@@ -1,35 +1,67 @@
+use std::{collections::HashMap, vec};
+
+use graphviz_rust::attributes::len;
 use rand::{rngs::ThreadRng, Rng};
 
-use crate::{digraph, extend_nodes};
-
 use super::{DiGraph, EmptyPayload};
+use crate::digraph;
+use std::hash::Hash;
 
-trait GenRestriction<NId, NL, EL> {
-    fn node(nid: &NId, nl: &NL) -> bool;
-    fn edge(from: &NId, to: &NId, el: &EL) -> bool;
+/// Erdős-Rényi model
+pub struct ERCfg {
+    pub node_len: usize,
+    pub edge_prob: f64,
+    pub self_conn: bool,
+    pub strict: bool,
+    pub max_from: usize,
+    pub max_to: usize,
 }
 
-pub struct GenCfg {
-    len: usize,
-    max_conn: usize,
-    allow_cycles: bool,
+pub enum RGGenCfg {
+    ER(ERCfg),
 }
 
-impl Default for GenCfg {
+impl Default for RGGenCfg {
     fn default() -> Self {
-        Self {
-            len: 50,
-            max_conn: 2,
-            allow_cycles: true,
-        }
+        RGGenCfg::ER(ERCfg {
+            node_len: 30,
+            edge_prob: 0.1,
+            self_conn: false,
+            strict: true,
+            max_from: 0,
+            max_to: 0,
+        })
     }
 }
 
-pub struct GraphGenerator {
-    cfg: GenCfg,
+pub struct RandomGraphGenerator {
+    cfg: RGGenCfg,
     random: ThreadRng,
 }
-impl Default for GraphGenerator {
+
+impl RandomGraphGenerator {
+    pub fn generate_empty(&mut self) -> DiGraph<usize, EmptyPayload, EmptyPayload> {
+        self.generate_usize(|_| EmptyPayload {}, |_, _| EmptyPayload {})
+    }
+
+    pub fn generate_usize<NL, EL, FNL, FEL>(
+        &mut self,
+        f_nl: FNL,
+        f_el: FEL,
+    ) -> DiGraph<usize, NL, EL>
+    where
+        FNL: Fn(&usize) -> NL,
+        FEL: Fn(&usize, &usize) -> EL,
+    {
+        let len = match self.cfg {
+            RGGenCfg::ER(ERCfg { node_len, .. }) => node_len,
+        };
+        let mut r = 0..len;
+        self.generate(move || r.next().unwrap(), f_nl, f_el)
+    }
+}
+
+impl Default for RandomGraphGenerator {
     fn default() -> Self {
         Self {
             cfg: Default::default(),
@@ -38,46 +70,120 @@ impl Default for GraphGenerator {
     }
 }
 
-impl GraphGenerator {
-    pub fn new(cfg: GenCfg) -> Self {
+impl RandomGraphGenerator {
+    pub fn new(cfg: RGGenCfg) -> Self {
         Self {
             cfg,
             random: rand::thread_rng(),
         }
     }
 
-    pub fn generate(&mut self) -> DiGraph<usize, EmptyPayload, EmptyPayload> {
-        let mut g = digraph!();
+    fn generate<NId, NL, EL, FNId, FNL, FEL>(
+        &mut self,
+        mut f_id: FNId,
+        f_nl: FNL,
+        f_el: FEL,
+    ) -> DiGraph<NId, NL, EL>
+    where
+        NId: Clone + Eq + Hash,
+        FNId: FnMut() -> NId,
+        FNL: Fn(&NId) -> NL,
+        FEL: Fn(&NId, &NId) -> EL,
+    {
+        let mut g = digraph!(NId, NL, EL);
 
-        let len = self.cfg.len;
-        let mut ids = vec![];
+        match self.cfg {
+            RGGenCfg::ER(ERCfg {
+                node_len,
+                edge_prob,
+                self_conn,
+                strict,
+                max_from,
+                max_to,
+            }) => {
+                let mut ids_counters = HashMap::new();
+                let mut ids = vec![];
+                for _ in 0..node_len {
+                    let id = f_id();
+                    let nl = f_nl(&id);
+                    g.add_node(id.clone(), nl);
+                    ids.push(id.clone());
+                    ids_counters.insert(id.clone(), (0usize, 0usize));
+                }
+                for from in ids.iter() {
+                    for to in ids.iter() {
+                        let max_bounds = max_from != 0
+                            && ids_counters
+                                .get(from)
+                                .map(|(v, _)| v >= &max_from)
+                                .unwrap_or(false)
+                            || max_to != 0
+                                && ids_counters
+                                    .get(to)
+                                    .map(|(_, v)| v >= &max_to)
+                                    .unwrap_or(false);
 
-        for id in 0..len.clone() {
-            g.add_bare_node(id);
-            ids.push(id);
-        }
-        let max_conn = self.cfg.max_conn;
-        for from in ids.into_iter() {
-            let current_size = self.random.gen_range(1..max_conn);
-            for _ in 0..current_size {
-                let to = self.random.gen_range(0..len.clone());
-                g.add_bare_edge(from.clone(), to);
+                        if !max_bounds {
+                            let should_gen = if !self_conn && from == to {
+                                false
+                            } else {
+                                self.random.gen_bool(edge_prob)
+                            };
+                            if should_gen {
+                                let back_link = g
+                                    .successors(to.clone())
+                                    .map(|ss| ss.contains_key(from))
+                                    .unwrap_or(false);
+
+                                if strict && back_link {
+                                } else {
+                                    ids_counters.entry(from.clone()).and_modify(|v| {
+                                        *v = (v.0 + 1, v.1);
+                                    });
+                                    ids_counters.entry(to.clone()).and_modify(|v| {
+                                        *v = (v.0, v.1 + 1);
+                                    });
+                                    let el = f_el(from, to);
+                                    g.add_edge(from.clone(), to.clone(), el);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
+
         g
     }
 }
 
 #[cfg(test)]
 pub mod tests {
-    use super::GraphGenerator;
+    use crate::graph::generator::{ERCfg, RGGenCfg};
+
+    use super::RandomGraphGenerator;
 
     #[test]
     fn simple_gen_test() {
-        let mut g = GraphGenerator::default();
-        let di = g.generate();
+        let mut g = RandomGraphGenerator::default();
+        let di = g.generate_empty();
 
         let r = di.visualize().str_to_dot_file("dots/gen.svg");
+        assert!(r.is_ok());
+    }
+    #[test]
+    fn simple_gen_load_test() {
+        let mut g = RandomGraphGenerator::new(RGGenCfg::ER(ERCfg {
+            node_len: 30,
+            edge_prob: 0.1,
+            self_conn: false,
+            strict: true,
+            max_from: 0,
+            max_to: 0,
+        }));
+        let di = g.generate_usize(|_| 0, |lhs, rhs| lhs + rhs);
+
+        let r = di.visualize().str_to_dot_file("dots/gen_load.svg");
         assert!(r.is_ok());
     }
 }

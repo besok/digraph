@@ -65,7 +65,7 @@ where
         self.edges.entry(from).or_default().remove(&to)
     }
 
-    pub fn descendants(&self, from: NId) -> Option<&HashMap<NId, EL>> {
+    pub fn successors(&self, from: NId) -> Option<&HashMap<NId, EL>> {
         self.edges.get(&from)
     }
 
