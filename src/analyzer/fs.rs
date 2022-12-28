@@ -3,7 +3,7 @@ use graphviz_rust::{
     dot_structures::Stmt,
 };
 
-use crate::graph::{
+use crate::{
     analyzer::SearchRes,
     visualizer::dot::{DotProcessor, ToStringProcessor},
 };
@@ -12,7 +12,7 @@ use std::fmt::Debug;
 use std::hash::Hash;
 
 use super::visit::{Visited, VisitedSet};
-use crate::graph::DiGraph;
+use crate::DiGraph;
 
 struct DFS<'a, NId, NL, EL>
 where
@@ -168,9 +168,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::graph::analyzer::fs::{SearchRes, SrcTrgHighlighter, BFS, DFS};
-    use crate::graph::DiGraph;
-    use crate::graph::EmptyPayload;
+    use crate::analyzer::fs::{SearchRes, SrcTrgHighlighter, BFS, DFS};
+    use crate::DiGraph;
+    use crate::EmptyPayload;
     use crate::{digraph, extend_edges, extend_nodes};
 
     #[test]

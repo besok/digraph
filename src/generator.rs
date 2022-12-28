@@ -268,7 +268,7 @@ impl RandomGraphGenerator {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::graph::generator::{ERCfg, RGGenCfg, WSCfg};
+    use crate::generator::{ERCfg, RGGenCfg, WSCfg};
 
     use super::RandomGraphGenerator;
 

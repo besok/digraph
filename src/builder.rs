@@ -162,7 +162,7 @@ macro_rules! digraph {
 #[cfg(test)]
 mod tests {
     use crate::digraph;
-    use crate::graph::{DiGraph, EmptyPayload};
+    use crate::{DiGraph, EmptyPayload};
     use std::collections::HashMap;
 
     #[derive(Default)]
@@ -178,10 +178,10 @@ mod tests {
     fn simple_macro_v_d_test() {
         let d = digraph!();
         let d = digraph!(_, S, usize);
-        let d = digraph!(_,S, S);
-        let d = digraph!(_,S,_);
-        let d = digraph!(_,_, S);
-        let d = digraph!(_,bool, S);
+        let d = digraph!(_, S, S);
+        let d = digraph!(_, S, _);
+        let d = digraph!(_, _, S);
+        let d = digraph!(_, bool, S);
         let d = digraph!(=> [1,2,3]);
         assert_eq!(
             d.nodes,
@@ -219,11 +219,15 @@ mod tests {
     }
     #[test]
     fn simple_diff_key_macro_test() {
-        let d = digraph!(String,_,_);
+        let d = digraph!(String, _, _);
         let d = digraph!((&str,_,_) => ["1","2","3"]);
         assert_eq!(
             d.nodes,
-            HashMap::from([("1", EmptyPayload), ("2", EmptyPayload), ("3", EmptyPayload)])
+            HashMap::from([
+                ("1", EmptyPayload),
+                ("2", EmptyPayload),
+                ("3", EmptyPayload)
+            ])
         );
 
         let mut g = digraph!((&str,_,i32) => ["a","b","c"] => {
@@ -235,17 +239,15 @@ mod tests {
 
         assert_eq!(f.get("a"), Some(&HashMap::from([("b", 0), ("c", 0)])));
         assert_eq!(f.get("b"), Some(&HashMap::from([("c", 0)])));
-
-
     }
 
     #[test]
     fn builder_nodes_test() {
-        let mut g = digraph!(_,usize,_);
+        let mut g = digraph!(_, usize, _);
         let g = extend_nodes!(g => [(1,1),(2,1)]);
         assert_eq!(g.nodes, HashMap::from([(1, 1), (2, 1)]));
 
-        let mut g = digraph!(_,usize,_);
+        let mut g = digraph!(_, usize, _);
         let def_p = 100;
         let g = extend_nodes!(g => [(1,def_p),(2,def_p)]);
         assert_eq!(g.nodes, HashMap::from([(1, 100), (2, 100)]));
@@ -253,7 +255,7 @@ mod tests {
 
     #[test]
     fn builder_edges_arr_to_test() {
-        let mut g = digraph!(_,_, i32);
+        let mut g = digraph!(_, _, i32);
         let mut g = extend_nodes!(g => [1,2,3,4,5,6,7]);
         let mut g = extend_edges!(g => {
             [(2,1),(3,1)] => 4
@@ -263,7 +265,7 @@ mod tests {
             HashMap::from([(2, HashMap::from([(4, 1)])), (3, HashMap::from([(4, 1)])),])
         );
 
-        let mut g = digraph!(_,_, i32);
+        let mut g = digraph!(_, _, i32);
         let mut g = extend_nodes!(g => [1,2,3,4,5,6,7]);
         let g = extend_edges!(g => {
             [(4,1),(1,1)] => 5;
@@ -279,7 +281,7 @@ mod tests {
             ])
         );
 
-        let mut g = digraph!(_,_, i32);
+        let mut g = digraph!(_, _, i32);
         let mut g = extend_nodes!(g => [1,2,3,4,5,6,7]);
         let mut g = extend_edges!(g => {
             [1,2] => (3,10)
@@ -348,7 +350,7 @@ mod tests {
             ])
         );
 
-        let mut g = digraph!(_,_, i32);
+        let mut g = digraph!(_, _, i32);
         let mut g = extend_nodes!(g => [1,2,3,4,5,6,7]);
         let g = extend_edges!(g => {
             [(1,1),(2,1)] => 3;
@@ -371,7 +373,7 @@ mod tests {
 
     #[test]
     fn builder_edges_simple_to_test() {
-        let mut g = digraph!(_,_, i32);
+        let mut g = digraph!(_, _, i32);
         let mut g = extend_nodes!(g => [1,2,3,4,5,6,7]);
         let mut g = extend_edges!(g => {
             1 => [1,2];

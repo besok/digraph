@@ -1,6 +1,6 @@
-use crate::graph::analyzer::min_weight::{MinWeight, Score};
-use crate::graph::visualizer::dot::{DotProcessor, ToStringProcessor};
-use crate::graph::DiGraph;
+use crate::analyzer::min_weight::{MinWeight, Score};
+use crate::visualizer::dot::{DotProcessor, ToStringProcessor};
+use crate::DiGraph;
 use graphviz_rust::attributes::*;
 use graphviz_rust::dot_generator::*;
 use graphviz_rust::dot_structures::Stmt;
@@ -241,13 +241,13 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::graph::analyzer::dijkstra::{
+    use crate::analyzer::dijkstra::{
         DijkstraPath, MinPathProcessor, MinScorePathProcessor, MinWeight,
     };
-    use crate::graph::analyzer::min_weight::Score;
-    use crate::graph::analyzer::min_weight::Score::*;
-    use crate::graph::DiGraph;
-    use crate::graph::EmptyPayload;
+    use crate::analyzer::min_weight::Score;
+    use crate::analyzer::min_weight::Score::*;
+    use crate::DiGraph;
+    use crate::EmptyPayload;
     use crate::{digraph, extend_edges, extend_nodes};
     use std::collections::BinaryHeap;
     use std::ops::Add;

@@ -1,4 +1,4 @@
-use crate::graph::{DiGraph, EmptyPayload};
+use crate::{DiGraph, EmptyPayload};
 use graphviz_rust::attributes::{EdgeAttributes, NodeAttributes};
 use graphviz_rust::cmd::{CommandArg, Format};
 use graphviz_rust::dot_generator::*;
@@ -70,9 +70,9 @@ where
 #[cfg(test)]
 mod tests {
 
-    use crate::graph::visualizer::{vis, vis_to_file};
-    use crate::graph::DiGraph;
-    use crate::graph::EmptyPayload;
+    use crate::visualizer::{vis, vis_to_file};
+    use crate::DiGraph;
+    use crate::EmptyPayload;
     use crate::*;
     use graphviz_rust::dot_structures::Graph;
 

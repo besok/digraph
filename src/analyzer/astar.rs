@@ -1,4 +1,4 @@
-use crate::graph::DiGraph;
+use crate::DiGraph;
 
 use super::min_weight::{MinWeight, Score};
 use std::collections::hash_map::Entry::Occupied;
@@ -151,10 +151,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::AStarPath;
-    use crate::graph::analyzer::dijkstra::DijkstraPath;
-    use crate::graph::analyzer::dijkstra::MinPathProcessor;
-    use crate::graph::DiGraph;
-    use crate::graph::EmptyPayload;
+    use crate::analyzer::dijkstra::DijkstraPath;
+    use crate::analyzer::dijkstra::MinPathProcessor;
+    use crate::DiGraph;
+    use crate::EmptyPayload;
     use crate::{digraph, extend_edges, extend_nodes};
     use std::convert::identity;
 

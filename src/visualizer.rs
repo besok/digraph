@@ -1,6 +1,6 @@
 pub mod dot;
 
-use crate::graph::{DiGraph, EmptyPayload};
+use crate::{DiGraph, EmptyPayload};
 use graphviz_rust::attributes::{EdgeAttributes, NodeAttributes};
 use graphviz_rust::cmd::{CommandArg, Format};
 use graphviz_rust::dot_generator::*;
