@@ -1,4 +1,6 @@
-# Digraph
+# Digraph-rs
+
+Sandbox for playing with digraphs.
 
 ## Description
 

@@ -1,4 +1,5 @@
 [package]
+categories = ["algorithms", "compilers", "data-structures"]
 name = "digraph-rs"
 description = "a handful of algorithms for digraphs"
 version = "0.1.0"
@@ -8,10 +9,9 @@ homepage = "https://github.com/besok/digraph-rs"
 repository = "https://github.com/besok/digraph-rs"
 readme = "README.md"
 license-file = "LICENSE"
-keywords = ["digraphs"]
-categories = ["algorithms"]
+keywords = ["digraph", "dfs", "bfs", "random_graph"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 graphviz-rust = "0.5.0"
-rand="0.8.5"
+rand = "0.8.5"
