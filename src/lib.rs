@@ -80,6 +80,7 @@ use crate::visualizer::dot::*;
 use crate::visualizer::{vis, vis_to_file};
 
 use self::visualizer::DotGraphVisualizer;
+use analyzer::predecessors::Predecessors;
 use graphviz_rust::dot_generator::{graph, id, node};
 use graphviz_rust::dot_structures::{Graph, Id, Stmt};
 use iterator::{NodeIteratorBF, NodeIteratorDF, NodeIteratorPlain};
@@ -190,6 +191,10 @@ where
 
     pub fn iter_bf(&self) -> NodeIteratorBF<NId, NL, EL> {
         NodeIteratorBF::new(&self)
+    }
+
+    pub fn predecessors(&self) -> Predecessors<NId> {
+        Predecessors::new(&self)
     }
 }
 

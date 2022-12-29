@@ -175,7 +175,7 @@ pub mod tests {
 
         assert!(res_iter_bf
             .get(2)
-            .filter(|s| s.clone() == &2 || s.clone() == &3)
+            .filter(|s| vec![2, 3].contains(s.clone()))
             .is_some());
 
         assert_eq!(res_iter_df.get(2), Some(&4));

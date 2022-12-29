@@ -8,6 +8,7 @@ pub mod dijkstra;
 pub mod dom;
 pub mod fs;
 pub mod min_weight;
+pub mod predecessors;
 pub mod visit;
 
 enum SearchRes {

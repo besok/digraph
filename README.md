@@ -18,8 +18,11 @@ A set of methods to handle and visualize the different approaches and algorithms
 - Dijkstra
 - AStar
 - BFS
+  - search
+  - iterators
 - DFS
-
+  - search
+  - iterators
 - Random graphs
   - Erdős-Rényi model
   - Watts Strogatz model
