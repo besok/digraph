@@ -37,7 +37,7 @@
 //!  - analyzer: the module allows performing a set of default algorithms  
 //!  - visualizer: the module allows visualizing the graph and some extra information in graphviz format
 //!  - generator: the module allows generating random graphs according to the different modules
-//!
+//!  - iterator: a set of iterators over the graph
 //! # Example with modules:
 //! ```rust
 //!  
@@ -73,6 +73,7 @@
 pub mod analyzer;
 pub mod builder;
 pub mod generator;
+pub mod iterator;
 pub mod visualizer;
 use crate::analyzer::GraphAnalyzer;
 use crate::visualizer::dot::*;
@@ -81,6 +82,7 @@ use crate::visualizer::{vis, vis_to_file};
 use self::visualizer::DotGraphVisualizer;
 use graphviz_rust::dot_generator::{graph, id, node};
 use graphviz_rust::dot_structures::{Graph, Id, Stmt};
+use iterator::{NodeIteratorBF, NodeIteratorDF, NodeIteratorPlain};
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
 use std::hash::Hash;
@@ -167,6 +169,27 @@ where
     /// Invokes a graph visualizer `DotGraphVisualizer`
     pub fn visualize(&self) -> DotGraphVisualizer<NId, NL, EL> {
         DotGraphVisualizer::new(self)
+    }
+
+    /// Returns an edge payload if exists
+    pub fn edge(&self, from: &NId, to: &NId) -> Option<&EL> {
+        self.edges.get(from).and_then(|tos| tos.get(to))
+    }
+    /// Returns a pair of id of node and node payload if exists
+    pub fn node_by_id(&self, id: &NId) -> Option<(&NId, &NL)> {
+        self.nodes.get_key_value(id)
+    }
+
+    pub fn iter(&self) -> NodeIteratorPlain<NId, NL> {
+        NodeIteratorPlain::new(&self)
+    }
+
+    pub fn iter_df(&self) -> NodeIteratorDF<NId, NL, EL> {
+        NodeIteratorDF::new(&self)
+    }
+
+    pub fn iter_bf(&self) -> NodeIteratorBF<NId, NL, EL> {
+        NodeIteratorBF::new(&self)
     }
 }
 

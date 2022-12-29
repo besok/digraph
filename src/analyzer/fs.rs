@@ -45,15 +45,15 @@ where
         let mut q = vec![];
 
         q.push(start);
-
+        visited.visit(start);
         while let Some(node) = q.pop() {
-            visited.visit(node);
             match target(node) {
                 SearchRes::Next => {
                     for nexts in self.graph.successors(node.clone()) {
                         for s in nexts.keys() {
                             if !visited.already_visited(s) {
-                                q.push(s)
+                                q.push(s);
+                                visited.visit(s);
                             }
                         }
                     }
@@ -100,15 +100,15 @@ where
         let mut q = VecDeque::new();
 
         q.push_back(start);
-
+        visited.visit(start);
         while let Some(node) = q.pop_front() {
-            visited.visit(node);
             match target(node) {
                 SearchRes::Next => {
                     for nexts in self.graph.successors(node.clone()) {
                         for s in nexts.keys() {
                             if !visited.already_visited(s) {
-                                q.push_back(s)
+                                q.push_back(s);
+                                visited.visit(s);
                             }
                         }
                     }
