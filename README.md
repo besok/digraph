@@ -10,19 +10,21 @@ A set of methods to handle and visualize the different approaches and algorithms
 
 ## What is inside
 
-- Di Graph
-- Graph builder: a set of macros to construct or extend graphs
-
-- Graph visualization to dot format
-
-- Dijkstra
-- AStar
-- BFS
-  - search
-  - iterators
+- Di Graph struct: `lib.rs`
+- Graph builder: a set of macros to construct or extend graphs: `builder.rs`
+- Graph visualization to dot format: `visualizer.rs`
+- Dijkstra: `analyzer\dijkstra.rs`
+- AStar: `analyzer\astar.rs`
+- BFS:
+  - search: `analyzer\fs.rs`
+  - iterators: `iterator.rs`
 - DFS
-  - search
-  - iterators
-- Random graphs
+  - search: `analyzer\fs.rs`
+  - iterators: `iterator.rs`
+    - post-order
+    - normal
+- dominators: `analyzer\dom.rs`
+  - simple fast
+- Random graphs: `generator.rs`
   - Erdős-Rényi model
   - Watts Strogatz model

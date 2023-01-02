@@ -23,7 +23,7 @@
 //!   graph.add_bare_edge(4, 1);
 //!   assert_eq!(graph.start(), &Some(1));
 //!        assert_eq!(
-//!            graph.successors(1),
+//!            graph.successors(&1),
 //!            Some(&HashMap::from_iter(
 //!                vec![(2usize, EmptyPayload)].into_iter()
 //!           ))
@@ -42,6 +42,7 @@
 //! ```rust
 //!  
 //!    use digraph_rs::{DiGraph,EmptyPayload,digraph, extend_edges, extend_nodes,};
+//!    use digraph_rs::generator::{RandomGraphGenerator,RGGenCfg,WSCfg};
 //!    use digraph_rs::analyzer::dijkstra::{DijkstraPath, MinPathProcessor};
 //!     #[test]
 //!      fn complex_example() {
@@ -66,7 +67,18 @@
 //!              .visualize()
 //!              .to_dot_file("dots/graph_path_1_8.svg", MinPathProcessor::new(trail));
 //!          assert!(r.is_ok());
-//!  }
+//!       }
+//!         
+//!        fn simple_gen_test() {
+//!           let mut ws_gen = RandomGraphGenerator::new(RGGenCfg::WS(WSCfg {
+//!            node_len: 20,
+//!            nearest_k: 4,
+//!            rewire_prob: 0.5,
+//!           }));
+//!           let di = ws_gen.generate_usize(|_| 0, |lhs, rhs| 0);
+//!           let r = di.visualize().str_to_dot_file("dots/gen_ws.svg");
+//!           assert!(r.is_ok());
+//!       }  
 //! ```
 //!
 
@@ -80,10 +92,11 @@ use crate::visualizer::dot::*;
 use crate::visualizer::{vis, vis_to_file};
 
 use self::visualizer::DotGraphVisualizer;
+use analyzer::dom::Dominators;
 use analyzer::predecessors::Predecessors;
 use graphviz_rust::dot_generator::{graph, id, node};
 use graphviz_rust::dot_structures::{Graph, Id, Stmt};
-use iterator::{NodeIteratorBF, NodeIteratorDF, NodeIteratorPlain};
+use iterator::{NodeIteratorBF, NodeIteratorDF, NodeIteratorDFPostOrder, NodeIteratorPlain};
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
 use std::hash::Hash;
@@ -138,8 +151,8 @@ where
     /// Returns a payload if the node is presented.
     ///
     /// **Note**: this operation should be accompanied by the remove_edge operations.  
-    pub fn remove_node(&mut self, id: NId) -> Option<NL> {
-        self.nodes.remove(&id)
+    pub fn remove_node(&mut self, id: &NId) -> Option<NL> {
+        self.nodes.remove(id)
     }
 
     /// Adds new edge. Returns prev.
@@ -148,13 +161,13 @@ where
     }
     /// Removes edge.
     /// Returns a payload on the edge if it exists.
-    pub fn remove_edge(&mut self, from: NId, to: NId) -> Option<EL> {
-        self.edges.entry(from).or_default().remove(&to)
+    pub fn remove_edge(&mut self, from: &NId, to: &NId) -> Option<EL> {
+        self.edges.entry(from.clone()).or_default().remove(to)
     }
 
     /// Returns a reference to the successors.
-    pub fn successors(&self, from: NId) -> Option<&HashMap<NId, EL>> {
-        self.edges.get(&from)
+    pub fn successors(&self, from: &NId) -> Option<&HashMap<NId, EL>> {
+        self.edges.get(from)
     }
 
     /// Returns a reference to a start node.
@@ -188,6 +201,9 @@ where
     pub fn iter_df(&self) -> NodeIteratorDF<NId, NL, EL> {
         NodeIteratorDF::new(&self)
     }
+    pub fn iter_df_post(&self) -> NodeIteratorDFPostOrder<NId, NL, EL> {
+        NodeIteratorDFPostOrder::new(&self)
+    }
 
     pub fn iter_bf(&self) -> NodeIteratorBF<NId, NL, EL> {
         NodeIteratorBF::new(&self)
@@ -195,6 +211,9 @@ where
 
     pub fn predecessors(&self) -> Predecessors<NId> {
         Predecessors::new(&self)
+    }
+    pub fn dominators(&self) -> Dominators<NId> {
+        Dominators::simple_fast(&self)
     }
 }
 
@@ -225,12 +244,12 @@ pub struct EmptyPayload;
 
 impl ToString for EmptyPayload {
     fn to_string(&self) -> String {
-        "x".to_string()
+        "".to_string()
     }
 }
 
 impl Debug for EmptyPayload {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("x")
+        f.write_str("")
     }
 }

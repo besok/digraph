@@ -12,6 +12,21 @@ pub trait DotProcessor<'a, NId, NL, EL> {
     fn edge(&self, from: &'a NId, to: &'a NId, el: &'a EL) -> Stmt;
 }
 
+pub trait ToStringOpt {
+    fn to_string_opt(&self) -> Option<String>;
+}
+
+impl<T: ToString> ToStringOpt for T {
+    fn to_string_opt(&self) -> Option<String> {
+        let r = self.to_string();
+        if r.is_empty() {
+            None
+        } else {
+            Some(r)
+        }
+    }
+}
+
 pub struct ToStringProcessor;
 
 impl ToStringProcessor {
@@ -22,11 +37,14 @@ impl ToStringProcessor {
         attrs: Vec<Attribute>,
     ) -> Stmt
     where
-        NId: ToString,
-        NL: ToString,
+        NId: ToStringOpt,
+        NL: ToStringOpt,
     {
-        let id = id.to_string();
-        let label = format!("\"{} {}\"", id, nl.to_string());
+        let id = id.to_string_opt().expect("the node id should exist");
+        let label = match nl.to_string_opt() {
+            Some(label) => format!("\"{} {}\"", id, label),
+            None => format!("\"{}\"", id),
+        };
         let mut attrs = attrs;
         attrs.push(NodeAttributes::label(label));
         stmt!(node!(id.as_str(), attrs))
@@ -39,14 +57,18 @@ impl ToStringProcessor {
         attrs: Vec<Attribute>,
     ) -> Stmt
     where
-        NId: ToString,
-        EL: ToString,
+        NId: ToStringOpt,
+        EL: ToStringOpt,
     {
-        let from = format!("{}", from.to_string());
-        let to = format!("{}", to.to_string());
-        let label = format!("{}", el.to_string());
+        let from = format!(
+            "{}",
+            from.to_string_opt().expect("the from point should exist")
+        );
+        let to = format!("{}", to.to_string_opt().expect("the to point should exist"));
         let mut attrs = attrs;
-        attrs.push(EdgeAttributes::label(label));
+        if let Some(label) = el.to_string_opt() {
+            attrs.push(EdgeAttributes::label(label));
+        }
 
         stmt!(edge!(node_id!(from.as_str()) => node_id!(to.as_str()), attrs))
     }
@@ -54,9 +76,9 @@ impl ToStringProcessor {
 
 impl<'a, NId, NL, EL> DotProcessor<'a, NId, NL, EL> for ToStringProcessor
 where
-    NId: ToString,
-    NL: ToString,
-    EL: ToString,
+    NId: ToStringOpt,
+    NL: ToStringOpt,
+    EL: ToStringOpt,
 {
     fn node(&self, id: &'a NId, nl: &'a NL) -> Stmt {
         self.node_with_attrs(id, nl, vec![])

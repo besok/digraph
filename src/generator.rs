@@ -48,7 +48,7 @@ fn has_back_link<NId, NL, EL>(g: &DiGraph<NId, NL, EL>, from: &NId, to: &NId) ->
 where
     NId: Clone + Eq + Hash,
 {
-    g.successors(to.clone())
+    g.successors(to)
         .map(|ss| ss.contains_key(from))
         .unwrap_or(false)
 }

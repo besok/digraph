@@ -4,32 +4,48 @@ use std::hash::Hash;
 
 use crate::DiGraph;
 
+/// Struct holds a map of predecessors(the opposite struct to successors)
+/// and
+/// a post order dfs vec.
 pub struct Predecessors<'a, NId>
 where
-    NId: Eq + Hash,
+    NId: Eq + Hash + Clone,
 {
     predecessors: HashMap<&'a NId, HashSet<&'a NId>>,
+    post_order: Vec<&'a NId>,
 }
 
 impl<'a, NId> Predecessors<'a, NId>
 where
-    NId: Eq + Hash,
+    NId: Eq + Hash + Clone,
 {
     pub fn new<NL, EL>(graph: &'a DiGraph<NId, NL, EL>) -> Self {
         let mut predecessors: HashMap<&NId, HashSet<&NId>> = HashMap::new();
+        let mut post_order = vec![];
 
-        for (from, ss) in graph.edges.iter() {
-            for to in ss.keys() {
-                predecessors
-                    .entry(to)
-                    .and_modify(|s| {
-                        s.insert(from);
-                    })
-                    .or_insert(HashSet::from_iter(vec![from]));
+        for (from, _) in graph.iter_df_post() {
+            post_order.push(from);
+            if let Some(ss) = graph.successors(from) {
+                for to in ss.keys() {
+                    predecessors
+                        .entry(to)
+                        .or_insert_with(HashSet::new)
+                        .insert(from);
+                }
             }
         }
 
-        Self { predecessors }
+        Self {
+            predecessors,
+            post_order,
+        }
+    }
+
+    pub fn post_order_line(&self) -> Vec<&NId> {
+        self.post_order.clone()
+    }
+    pub fn predecessors(&self) -> HashMap<&NId, HashSet<&NId>> {
+        self.predecessors.clone()
     }
 
     pub fn by_node(&self, id: &NId) -> Option<&HashSet<&NId>> {

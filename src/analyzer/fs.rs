@@ -49,9 +49,9 @@ where
         while let Some(node) = q.pop() {
             match target(node) {
                 SearchRes::Next => {
-                    for nexts in self.graph.successors(node.clone()) {
+                    for nexts in self.graph.successors(node) {
                         for s in nexts.keys() {
-                            if !visited.already_visited(s) {
+                            if !visited.is_visited(s) {
                                 q.push(s);
                                 visited.visit(s);
                             }
@@ -104,9 +104,9 @@ where
         while let Some(node) = q.pop_front() {
             match target(node) {
                 SearchRes::Next => {
-                    for nexts in self.graph.successors(node.clone()) {
+                    for nexts in self.graph.successors(node) {
                         for s in nexts.keys() {
-                            if !visited.already_visited(s) {
+                            if !visited.is_visited(s) {
                                 q.push_back(s);
                                 visited.visit(s);
                             }
