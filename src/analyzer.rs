@@ -5,9 +5,11 @@ use std::hash::Hash;
 
 pub mod astar;
 pub mod dijkstra;
+pub mod disjoint;
 pub mod dom;
 pub mod fs;
 pub mod min_weight;
+pub mod mst;
 pub mod predecessors;
 pub mod visit;
 
