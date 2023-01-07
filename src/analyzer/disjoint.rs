@@ -1,22 +1,11 @@
 use std::collections::HashSet;
+
 /// https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Applications
 pub struct DisjointSet<T>
 where
     T: PartialEq,
 {
     entities: Vec<Entity<T>>,
-}
-
-impl<T> DisjointSet<T>
-where
-    T: PartialEq + Clone,
-{
-    fn get_data(&self, ptr: EntityPtr) -> T {
-        self.entities
-            .get(ptr.ptr)
-            .map(|e| e.data.clone())
-            .expect("the entity behind the pointer is absent")
-    }
 }
 
 impl<T> DisjointSet<T>
@@ -28,16 +17,21 @@ where
             entities: Vec::new(),
         }
     }
-
+    pub fn data(&self, ptr: EntityPtr) -> &T {
+        self.entities
+            .get(ptr.ptr)
+            .map(|e| &e.data)
+            .expect("the entity behind the pointer is absent")
+    }
     pub fn make_set(&mut self, data: T) -> EntityPtr {
-        for (idx, e) in self.entities.iter().enumerate() {
-            if e.data.eq(&data) {
-                return EntityPtr { ptr: idx };
-            }
-        }
-        EntityPtr {
-            ptr: self.insert(data),
-        }
+        self.entities
+            .iter()
+            .enumerate()
+            .find(|(_, e)| e.data.eq(&data))
+            .map(|(ptr, _)| EntityPtr { ptr })
+            .unwrap_or(EntityPtr {
+                ptr: self.insert(data),
+            })
     }
 
     pub fn find(&mut self, ptr: EntityPtr) -> EntityPtr {
@@ -105,7 +99,7 @@ where
 
 #[derive(Clone, Copy)]
 pub struct EntityPtr {
-    ptr: usize,
+    pub ptr: usize,
 }
 
 #[derive(Debug)]
