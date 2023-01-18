@@ -28,3 +28,5 @@ A set of methods to handle and visualize the different approaches and algorithms
 - Random graphs: `generator.rs`
   - Erdős-Rényi model
   - Watts Strogatz model
+- disjoint set
+- strongly connected components(Tarjan)

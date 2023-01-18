@@ -94,6 +94,7 @@ use crate::visualizer::{vis, vis_to_file};
 use self::visualizer::DotGraphVisualizer;
 use analyzer::dom::Dominators;
 use analyzer::predecessors::Predecessors;
+use analyzer::scc::TarjanSCC;
 use graphviz_rust::dot_generator::{graph, id, node};
 use graphviz_rust::dot_structures::{Graph, Id, Stmt};
 use iterator::{NodeIteratorBF, NodeIteratorDF, NodeIteratorDFPostOrder, NodeIteratorPlain};
@@ -170,6 +171,14 @@ where
         self.edges.get(from)
     }
 
+    /// Returns a reference to the successors ids.
+    pub fn successors_ids(&self, from: &NId) -> Vec<&NId> {
+        self.edges
+            .get(from)
+            .map(|m| m.keys().collect())
+            .unwrap_or(vec![])
+    }
+
     /// Returns a reference to a start node.
     pub fn start(&self) -> &Option<NId> {
         &self.start
@@ -214,6 +223,9 @@ where
     }
     pub fn dominators(&self) -> Dominators<NId> {
         Dominators::simple_fast(&self)
+    }
+    pub fn scc(&self) -> Vec<Vec<&NId>> {
+        TarjanSCC::new(&self).process_graph()
     }
 }
 
