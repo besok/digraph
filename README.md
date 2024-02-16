@@ -30,3 +30,4 @@ A set of methods to handle and visualize the different approaches and algorithms
   - Watts Strogatz model
 - disjoint set
 - strongly connected components(Tarjan)
+- Bipartite graph

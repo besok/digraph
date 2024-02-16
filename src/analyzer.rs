@@ -13,6 +13,7 @@ pub mod mst;
 pub mod predecessors;
 pub mod scc;
 pub mod visit;
+mod bipartite;
 
 enum SearchRes {
     Next,
