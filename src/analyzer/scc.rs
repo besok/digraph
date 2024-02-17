@@ -59,7 +59,7 @@ where
         self.state.insert(id, idx);
         self.idx += 1;
 
-        for next in self.graph.successors_ids(id) {
+        for next in self.graph.successor_ids(id) {
             match self.state.get(next) {
                 Some(idx) => {
                     if idx.on_stack {

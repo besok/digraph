@@ -172,7 +172,7 @@ where
     }
 
     /// Returns a reference to the successors ids.
-    pub fn successors_ids(&self, from: &NId) -> Vec<&NId> {
+    pub fn successor_ids(&self, from: &NId) -> Vec<&NId> {
         self.edges
             .get(from)
             .map(|m| m.keys().collect())
