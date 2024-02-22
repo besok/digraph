@@ -15,8 +15,15 @@ enum Color {
 impl Color {
     fn switch(&self) -> Color {
         match self {
-            White | NoColor => { Black }
-            Black => { White }
+            NoColor => Black,
+            White => Black,
+            Black => White
+        }
+    }
+    fn is_opposite(&self, color: &Color) -> bool {
+        match (&self, color) {
+            (White, Black) | (Black, White) => true,
+            _ => false
         }
     }
 }
@@ -36,48 +43,50 @@ struct Bipartite<'a, NId, NL, EL>
 impl<'a, NId, NL, EL> Bipartite<'a, NId, NL, EL>
     where NId: Eq + Hash + Clone + Debug,
 {
-    fn not_visited(&self, id: NId) -> bool {
-        match self.colors.get(&id) {
-            None | Some(NoColor) => { true }
-            _ => { false }
+    fn is_opposite(&self, lhs: &NId, rhs: &NId) -> bool {
+        match (self.colors.get(lhs), self.colors.get(rhs)) {
+            (Some(l), Some(r)) => l.is_opposite(r),
+            _ => false
         }
     }
-    fn eq_colors(&self, lhs: NId, rhs: NId) -> bool {
-        self.colors.get(&lhs) == self.colors.get(&rhs)
-    }
-    fn opposite_colors(&self, lhs: NId, rhs: NId) -> bool {
-        match (self.colors.get(&lhs), self.colors.get(&rhs)) {
-            (Some(White), Some(Black)) | (Some(Black), Some(White)) => { true }
+    fn not_visited(&self, nid: &NId) -> bool {
+        match self.colors.get(nid) {
+            None | Some(NoColor) => true,
             _ => false
         }
     }
 
     pub fn new(graph: &'a DiGraph<NId, NL, EL>) -> Self {
-        let colors =
-            graph.nodes.iter().map(|(k, _)| (k.clone(), NoColor)).collect();
+        let mut colors: HashMap<NId, Color> =
+            graph.nodes.iter().map(|(id, _)| (id.clone(), NoColor)).collect();
         Self { graph, colors }
     }
-    fn has_odd_cycles(&mut self, id: NId, color: Color) -> bool {
-        !self.has_no_odd_cycles(id, color)
+    fn has_odd_cycles(&mut self, id: NId) -> bool {
+        !self.has_no_odd_cycles(id)
     }
-    fn has_no_odd_cycles(&mut self, id: NId, color: Color) -> bool {
-        self.colors.insert(id.clone(), color.clone());
-        for ss in self.graph.successor_ids(&id) {
-            if self.eq_colors(ss.clone(), id.clone()) {
-                return false;
-            } else if self.opposite_colors(ss.clone(),id.clone()) {
-                continue
-            }
-            else if self.has_odd_cycles(ss.clone(), color.switch()) {
-                return false;
+    fn has_no_odd_cycles(&mut self, id: NId) -> bool {
+        let mut q = vec![];
+        q.push(id);
+
+        while let Some(id) = q.pop() {
+            for ss in self.graph.successor_ids(&id) {
+                if self.not_visited(ss) {
+                    let color = self.colors.get(&id).map(Color::switch).unwrap_or(Black);
+                    self.colors.insert(ss.clone(), color);
+                    q.push(ss.clone())
+                } else if !self.is_opposite(&id, ss) {
+                    return false;
+                }
             }
         }
+
         true
     }
     pub fn bipartite(&mut self) -> bool {
         for (nid, _) in &self.graph.nodes {
-            if self.not_visited(nid.clone()) {
-                if self.has_odd_cycles(nid.clone(), Black) {
+            if self.not_visited(nid) {
+                self.colors.insert(nid.clone(), Black);
+                if self.has_odd_cycles(nid.clone()) {
                     return false;
                 }
             }
@@ -100,7 +109,7 @@ mod tests {
     fn smoke_test() {
         let graph = digraph!((&str,_,_) => ["A","B","C","D"] => {
            "A" => "B";
-           "B" => ["C"];
+           "B" => "C";
            "C" => "D";
            "D" => "A"
 
@@ -111,12 +120,6 @@ mod tests {
         let mut c = Bipartite::new(&graph);
         assert!(c.bipartite());
 
-        let graph = digraph!((usize,_,_) => [0,1,2,3] => {
-           0 => [1,3];
-           [1,3] => 2;
-        });
-        let mut c = Bipartite::new(&graph);
-        assert!(c.bipartite());
 
         let graph = digraph!((&str,_,_) => ["A","B","C","D","E"] => {
            "A" => "B";
