@@ -283,11 +283,11 @@ pub mod tests {
     #[test]
     fn simple_gen_load_test() {
         let mut g = RandomGraphGenerator::new(RGGenCfg::ER(ERCfg {
-            node_len: 30,
-            edge_prob: 0.1,
+            node_len: 10,
+            edge_prob: 0.2,
             self_conn: false,
             back_strict: true,
-            max_from: 0,
+            max_from: 5,
             max_to: 0,
         }));
         let di = g.generate_usize(|_| 0, |lhs, rhs| lhs + rhs);

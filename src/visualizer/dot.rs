@@ -1,12 +1,11 @@
 use crate::{DiGraph, EmptyPayload};
 use graphviz_rust::attributes::{EdgeAttributes, NodeAttributes};
-use graphviz_rust::cmd::{CommandArg, Format};
 use graphviz_rust::dot_generator::*;
 use graphviz_rust::dot_structures::*;
-use graphviz_rust::printer::{DotPrinter, PrinterContext};
-use graphviz_rust::{exec, exec_dot};
+use graphviz_rust::printer::{DotPrinter};
 use std::hash::Hash;
 
+/// The processor to visualize the nodes and edges of the graph to dot format
 pub trait DotProcessor<'a, NId, NL, EL> {
     fn node(&self, id: &'a NId, nl: &'a NL) -> Stmt;
     fn edge(&self, from: &'a NId, to: &'a NId, el: &'a EL) -> Stmt;
@@ -18,11 +17,9 @@ pub trait ToStringOpt {
 
 impl<T: ToString> ToStringOpt for T {
     fn to_string_opt(&self) -> Option<String> {
-        let r = self.to_string();
-        if r.is_empty() {
-            None
-        } else {
-            Some(r)
+        match self.to_string().as_str() {
+            e if e.is_empty() => None,
+            e => Some(e.to_owned())
         }
     }
 }
@@ -36,9 +33,9 @@ impl ToStringProcessor {
         nl: &'a NL,
         attrs: Vec<Attribute>,
     ) -> Stmt
-    where
-        NId: ToStringOpt,
-        NL: ToStringOpt,
+        where
+            NId: ToStringOpt,
+            NL: ToStringOpt,
     {
         let id = id.to_string_opt().expect("the node id should exist");
         let label = match nl.to_string_opt() {
@@ -56,9 +53,9 @@ impl ToStringProcessor {
         el: &'a EL,
         attrs: Vec<Attribute>,
     ) -> Stmt
-    where
-        NId: ToStringOpt,
-        EL: ToStringOpt,
+        where
+            NId: ToStringOpt,
+            EL: ToStringOpt,
     {
         let from = format!(
             "{}",
@@ -75,10 +72,10 @@ impl ToStringProcessor {
 }
 
 impl<'a, NId, NL, EL> DotProcessor<'a, NId, NL, EL> for ToStringProcessor
-where
-    NId: ToStringOpt,
-    NL: ToStringOpt,
-    EL: ToStringOpt,
+    where
+        NId: ToStringOpt,
+        NL: ToStringOpt,
+        EL: ToStringOpt,
 {
     fn node(&self, id: &'a NId, nl: &'a NL) -> Stmt {
         self.node_with_attrs(id, nl, vec![])
@@ -91,7 +88,6 @@ where
 
 #[cfg(test)]
 mod tests {
-
     use crate::visualizer::{vis, vis_to_file};
     use crate::DiGraph;
     use crate::EmptyPayload;
@@ -111,10 +107,11 @@ mod tests {
              9 => 10
             }
         )
-        .visualize()
-        .str_to_dot_file("dots/output.svg");
+            .visualize()
+            .str_to_dot_file("dots/output.svg");
         println!("{:?}", dot)
     }
+
     #[test]
     fn simple_viz_to_file_payload_edge_test() {
         let dot = digraph!(
@@ -128,10 +125,11 @@ mod tests {
              9 => 10
             }
         )
-        .visualize()
-        .str_to_dot_file("dots/output.svg");
+            .visualize()
+            .str_to_dot_file("dots/output.svg");
         println!("{:?}", dot)
     }
+
     #[test]
     fn simple_viz_to_file_str_edge_test() {
         let dot = digraph!(
@@ -140,8 +138,8 @@ mod tests {
                 "company" => "employee"
             }
         )
-        .visualize()
-        .str_to_dot_file("dots/output.svg");
+            .visualize()
+            .str_to_dot_file("dots/output.svg");
 
         println!("{:?}", dot)
     }
