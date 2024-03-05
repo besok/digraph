@@ -6,12 +6,10 @@ use graphviz_rust::dot_generator::*;
 use graphviz_rust::dot_structures::Stmt;
 use graphviz_rust::dot_structures::*;
 use std::borrow::Borrow;
-use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 use std::convert::identity;
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::marker::PhantomData;
 use std::ops::{Add, Index};
 #[derive(Debug)]
 pub struct DijkstraPath<'a, NId, NL, EL>

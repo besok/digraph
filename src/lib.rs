@@ -87,6 +87,7 @@ pub mod builder;
 pub mod generator;
 pub mod iterator;
 pub mod visualizer;
+
 use crate::analyzer::GraphAnalyzer;
 use crate::visualizer::dot::*;
 use crate::visualizer::{vis, vis_to_file};
@@ -102,14 +103,28 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
 use std::hash::Hash;
 
+pub struct Edge<'a, NId, EL> where
+    NId: Eq + Hash, {
+    src: &'a NId,
+    trg: &'a NId,
+    payload: &'a EL,
+}
+
+impl<'a, NId, EL> Edge<'a, NId, EL> where
+    NId: Eq + Hash, {
+    pub fn new(src: &'a NId, trg: &'a NId, payload: &'a EL) -> Self {
+        Self { src, trg, payload }
+    }
+}
+
 /// The base structure denoting a directed graph with a start in the first added node.
 ///  - NId: id of the node. should be unique and implement `Eq + Hash`
 ///  - NL: payload for node
 ///  - EL: payload for edge
 #[derive(Debug)]
 pub struct DiGraph<NId, NL, EL>
-where
-    NId: Eq + Hash,
+    where
+        NId: Eq + Hash,
 {
     nodes: HashMap<NId, NL>,
     edges: HashMap<NId, HashMap<NId, EL>>,
@@ -124,8 +139,8 @@ impl DiGraph<usize, EmptyPayload, EmptyPayload> {
 }
 
 impl<NId, NL, EL> DiGraph<NId, NL, EL>
-where
-    NId: Clone + Eq + Hash,
+    where
+        NId: Clone + Eq + Hash,
 {
     fn insert_new_node(&mut self, payload: NL, id: NId) -> NId {
         self.nodes.insert(id.clone(), payload);
@@ -227,12 +242,27 @@ where
     pub fn scc(&self) -> Vec<Vec<&NId>> {
         TarjanSCC::new(&self).process_graph()
     }
+
+    /// Returns a list of edge references as a plain structure.
+    pub fn edges(&self) -> Vec<Edge<NId, EL>> {
+        let mut edges = vec![];
+
+        for (nid, _) in &self.nodes {
+            if let Some(ss) = self.successors(nid) {
+                for (trg, el) in ss {
+                    edges.push(Edge::new(nid, trg, el))
+                }
+            }
+        }
+
+        edges
+    }
 }
 
 impl<NId, NL, EL> DiGraph<NId, NL, EL>
-where
-    NId: Clone + Eq + Hash,
-    NL: Default,
+    where
+        NId: Clone + Eq + Hash,
+        NL: Default,
 {
     /// Adds a node with an `EmptyPayload`
     pub fn add_bare_node(&mut self, id: NId) -> Option<NId> {
@@ -241,9 +271,9 @@ where
 }
 
 impl<NId, NL, EL> DiGraph<NId, NL, EL>
-where
-    NId: Clone + Eq + Hash,
-    EL: Default,
+    where
+        NId: Clone + Eq + Hash,
+        EL: Default,
 {
     /// Adds an edge with an `EmptyPayload`
     pub fn add_bare_edge(&mut self, from: NId, to: NId) -> Option<EL> {

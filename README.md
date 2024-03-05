@@ -33,6 +33,7 @@ A set of methods to handle and visualize the different approaches and algorithms
 - strongly connected components(Tarjan)
 - disjoint set
 - Bipartite graph
+- minimum spanning tree (Kruskal's algorithm)
 
 ## Random graph generators
 
