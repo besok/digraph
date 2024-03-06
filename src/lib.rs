@@ -103,6 +103,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
 use std::hash::Hash;
 
+#[derive(PartialEq,Eq)]
 pub struct Edge<'a, NId, EL> where
     NId: Eq + Hash, {
     src: &'a NId,

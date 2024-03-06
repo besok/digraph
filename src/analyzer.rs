@@ -1,6 +1,4 @@
-use crate::analyzer::dijkstra::DijkstraPath;
 use crate::DiGraph;
-use graphviz_rust::dot_structures::Node;
 use std::hash::Hash;
 
 pub mod astar;
