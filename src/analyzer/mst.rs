@@ -150,7 +150,7 @@ mod tests {
             "C" => ("E", 5);
             "D" => ("E", 6);
         });
-        let mut d = MinimumSpanningArborescence::new(&graph);
+        let mut d = &mut graph.analyze().min_spanning_arborescence();
         let edges = d.find();
         let _ = graph.visualize().to_dot_file("dots/msa.svg", MSAHighlighter::new(edges));
     }
